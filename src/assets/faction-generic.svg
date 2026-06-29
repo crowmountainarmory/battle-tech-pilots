@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Faction emblem placeholder">
+  <rect x="8" y="8" width="112" height="112" rx="16" fill="#f2f2f2" stroke="#111" stroke-width="8"/>
+  <circle cx="64" cy="64" r="30" fill="#111"/>
+  <path d="M64 34v60M34 64h60" stroke="#f2f2f2" stroke-width="8" stroke-linecap="round"/>
+</svg>

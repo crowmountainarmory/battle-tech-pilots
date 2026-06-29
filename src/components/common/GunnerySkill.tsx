@@ -1,0 +1,24 @@
+import classNames from 'classnames'
+import crosshairIcon from '../../assets/crosshair.svg?url'
+import DiceIcon from './DiceIcon'
+
+interface GunnerySkillProps extends React.HTMLAttributes<HTMLDivElement> {
+	skill: number
+}
+
+function GunnerySkill({ skill, className, ...props }: GunnerySkillProps) {
+	if (!Number.isInteger(skill) || skill < 1 || skill > 6) {
+		throw new Error('Invalid pilot skill. Expected an integer from 1 to 6.')
+	}
+
+	return (
+		<div
+			className={classNames('inline-flex items-center gap-2', className)}
+			{...props}
+		>
+			<DiceIcon pips={skill} size={8} />
+		</div>
+	)
+}
+
+export default GunnerySkill
