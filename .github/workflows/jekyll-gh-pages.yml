@@ -38,8 +38,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        env:
-          GITHUB_PAGES: 'true'
         run: npm run build
       - name: Disable Jekyll
         run: touch dist/.nojekyll
