@@ -176,12 +176,32 @@ function App() {
   const skillOptions = Object.values(SkillTier)
     .filter((value): value is SkillTier => typeof value === 'number')
     .map((skill) => ({ value: skill, label: `${skill}+` }))
+  const areSpecialAbilitiesDisabled =
+    pilot.gunnerySkill >= SkillTier.Green || pilot.pilotingSkill >= SkillTier.Green
+  const specialAbilitiesDisabledMessage =
+    pilot.gunnerySkill >= SkillTier.Green && pilot.pilotingSkill >= SkillTier.Green
+      ? 'Special abilities are disabled when gunnery or piloting skill is 5+.'
+      : pilot.gunnerySkill >= SkillTier.Green
+      ? 'Special abilities are disabled when gunnery skill is 5+.'
+      : 'Special abilities are disabled when piloting skill is 5+.'
   const portraitsForSelectedGender = getPortraitsByGender(pilot.gender)
   const specialAbilityDisplayModeOptions: Array<{ value: SpecialAbilityDisplayMode; label: string }> = [
     { value: 'nameOnly', label: 'Name Only' },
     { value: 'nameAndDescription', label: 'Name and Description' },
     { value: 'nameAndRuleDescription', label: 'Name and Rule Description' }
   ]
+
+  useEffect(() => {
+    if (!areSpecialAbilitiesDisabled) {
+      return
+    }
+
+    if (pilot.specialAbilities.length === 0) {
+      return
+    }
+
+    updatePilot('specialAbilities', [])
+  }, [areSpecialAbilitiesDisabled, pilot.specialAbilities.length])
 
   const updatePilot = <K extends keyof Pilot>(key: K, value: Pilot[K]) => {
     setPilot((currentPilot) => ({ ...currentPilot, [key]: value }))
@@ -333,6 +353,8 @@ function App() {
             selectedAbilities={pilot.specialAbilities}
             onSelectedAbilitiesChange={(abilities) => updatePilot('specialAbilities', abilities)}
             onOptionsChange={setSpecialAbilityOptions}
+            disabled={areSpecialAbilitiesDisabled}
+            disabledMessage={specialAbilitiesDisabledMessage}
           />
 
           <GenericDropdown<SpecialAbilityDisplayMode>
