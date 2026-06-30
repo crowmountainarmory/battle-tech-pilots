@@ -25,6 +25,7 @@ import {
   useSavePersistedCardStateMutation
 } from './hooks/usePersistedCardStateQuery'
 
+
 const createDefaultPilot = (): Pilot => ({
   firstName: faker.person.firstName('male'),
   lastName: faker.person.lastName('male'),
@@ -151,6 +152,25 @@ function App() {
     showDefinitions,
     savePersistedCardState
   ])
+  
+  useEffect(() => {
+    if (specialAbilityOptions.length === 0) {
+      return
+    }
+
+    const abilityNames = new Set(specialAbilityOptions.map((ability) => ability.name))
+    setPilot((currentPilot) => {
+      const filteredAbilities = currentPilot.specialAbilities.filter((abilityName) => abilityNames.has(abilityName))
+      if (filteredAbilities.length === currentPilot.specialAbilities.length) {
+        return currentPilot
+      }
+
+      return {
+        ...currentPilot,
+        specialAbilities: filteredAbilities
+      }
+    })
+  }, [specialAbilityOptions])
 
   const rankOptions = Object.values(Rank).map((rank) => ({ value: rank, label: rank }))
   const skillOptions = Object.values(SkillTier)
