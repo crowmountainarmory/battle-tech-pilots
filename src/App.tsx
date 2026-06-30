@@ -18,6 +18,7 @@ import {
 import {
   getSpecialAbilities,
   initializeSpecialAbilitiesDatabase,
+  seedSpecialAbilitiesDatabase,
   type SpecialAbilityRecord
 } from './data/specialAbilitiesDb'
 import classNames from 'classnames'
@@ -61,15 +62,26 @@ function App() {
 
     const loadSpecialAbilities = async () => {
       try {
-        const initializedDatabase = await initializeSpecialAbilitiesDatabase()
+        const { database, hasSourceUpdates } = await initializeSpecialAbilitiesDatabase()
 
         if (cancelled) {
-          initializedDatabase.close()
+          database.close()
           return
         }
 
-        setSpecialAbilityOptions(await getSpecialAbilities(initializedDatabase))
-        initializedDatabase.close()
+        let shouldRefresh = false
+        if (hasSourceUpdates) {
+          shouldRefresh = window.confirm(
+            'Special abilities data has changed. Refreshing will update the database and remove unavailable abilities from your card. Refresh now?'
+          )
+        }
+
+        if (hasSourceUpdates && shouldRefresh) {
+          await seedSpecialAbilitiesDatabase(database)
+        }
+
+        setSpecialAbilityOptions(await getSpecialAbilities(database))
+        database.close()
       } catch (error) {
         console.error('Failed to initialize special abilities database:', error)
         setSpecialAbilityOptions([])
@@ -166,6 +178,25 @@ function App() {
       console.error('Failed to save card state to local storage:', error)
     }
   }, [isHydrated, pilot, hidePilotSkill, specialAbilityDisplayMode, showDefinitions])
+
+  useEffect(() => {
+    if (specialAbilityOptions.length === 0) {
+      return
+    }
+
+    const abilityNames = new Set(specialAbilityOptions.map((ability) => ability.name))
+    setPilot((currentPilot) => {
+      const filteredAbilities = currentPilot.specialAbilities.filter((abilityName) => abilityNames.has(abilityName))
+      if (filteredAbilities.length === currentPilot.specialAbilities.length) {
+        return currentPilot
+      }
+
+      return {
+        ...currentPilot,
+        specialAbilities: filteredAbilities
+      }
+    })
+  }, [specialAbilityOptions])
 
   const rankOptions = Object.values(Rank)
   const skillOptions = Object.values(SkillTier).filter((value): value is SkillTier => typeof value === 'number')
