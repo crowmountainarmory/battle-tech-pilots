@@ -46,6 +46,16 @@ export const initializeSpecialAbilitiesDatabase = async (): Promise<IDBDatabase>
 export const getSpecialAbilities = (database: IDBDatabase): Promise<SpecialAbilityRecord[]> =>
   withIndexedDbStore(database, SPECIAL_ABILITIES_STORE_NAME, 'readonly', async (store) => getAllRecords<SpecialAbilityRecord>(store))
 
+export const loadSpecialAbilities = async (): Promise<SpecialAbilityRecord[]> => {
+  const database = await initializeSpecialAbilitiesDatabase()
+
+  try {
+    return await getSpecialAbilities(database)
+  } finally {
+    database.close()
+  }
+}
+
 export const replaceSpecialAbilities = async (
   database: IDBDatabase,
   specialAbilities: SpecialAbilityRecord[]

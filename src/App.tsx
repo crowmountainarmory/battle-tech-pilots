@@ -5,6 +5,7 @@ import DiceIcon from './components/common/DiceIcon'
 import FactionSelector, { Faction } from './components/common/FactionSelector'
 import PilotGenderSelector from './components/common/PilotGenderSelector'
 import PilotImageGallery from './components/common/PilotImageGallery'
+import SpecialAbilitiesSelector from './components/SpecialAbilitiesSelector'
 import PilotCard, { Pilot, Rank, SkillTier, type SpecialAbilityDisplayMode } from './components/PilotCard'
 import {
   getDefaultPortraitIdByGender,
@@ -15,22 +16,13 @@ import {
   PILOT_PORTRAITS,
   PilotGender
 } from './data/pilotPortraits'
+import { type SpecialAbilityRecord } from './data/specialAbilitiesDb'
 import {
-  getSpecialAbilities,
-  initializeSpecialAbilitiesDatabase,
-  type SpecialAbilityRecord
-} from './data/specialAbilitiesDb'
-import classNames from 'classnames'
-
-const CARD_STATE_STORAGE_KEY = 'battle-tech-pilot-card-state-v1'
-const MAX_SPECIAL_ABILITIES = 3
-
-interface PersistedCardState {
-  pilot: Pilot
-  hidePilotSkill: boolean
-  specialAbilityDisplayMode: SpecialAbilityDisplayMode
-  showDefinitions: boolean
-}
+  type PersistedCardState,
+  useClearPersistedCardStateMutation,
+  usePersistedCardStateQuery,
+  useSavePersistedCardStateMutation
+} from './hooks/usePersistedCardStateQuery'
 
 const createDefaultPilot = (): Pilot => ({
   firstName: faker.person.firstName('male'),
@@ -55,43 +47,26 @@ function App() {
   const [showDefinitions, setShowDefinitions] = useState(true)
   const [isHydrated, setIsHydrated] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const { data: persistedCardState, isSuccess: isPersistedCardStateLoaded } = usePersistedCardStateQuery()
+  const { mutate: savePersistedCardState } = useSavePersistedCardStateMutation()
+  const { mutate: clearPersistedCardState } = useClearPersistedCardStateMutation()
 
   useEffect(() => {
-    let cancelled = false
-
-    const loadSpecialAbilities = async () => {
-      try {
-        const initializedDatabase = await initializeSpecialAbilitiesDatabase()
-
-        if (cancelled) {
-          initializedDatabase.close()
-          return
-        }
-
-        setSpecialAbilityOptions(await getSpecialAbilities(initializedDatabase))
-        initializedDatabase.close()
-      } catch (error) {
-        console.error('Failed to initialize special abilities database:', error)
-        setSpecialAbilityOptions([])
-      }
+    if (!isPersistedCardStateLoaded) {
+      return
     }
 
-    void loadSpecialAbilities()
-
-    return () => {
-      cancelled = true
+    if (isHydrated) {
+      return
     }
-  }, [])
 
-  useEffect(() => {
     try {
-      const stored = localStorage.getItem(CARD_STATE_STORAGE_KEY)
-      if (!stored) {
+      if (!persistedCardState) {
         setIsHydrated(true)
         return
       }
 
-      const parsed = JSON.parse(stored) as Partial<PersistedCardState>
+      const parsed = persistedCardState
       const parsedHidePilotSkill = typeof parsed.hidePilotSkill === 'boolean' ? parsed.hidePilotSkill : true
       const parsedSpecialAbilityDisplayMode =
         parsed.specialAbilityDisplayMode === 'nameAndDescription' || parsed.specialAbilityDisplayMode === 'nameAndRuleDescription'
@@ -147,7 +122,7 @@ function App() {
     } finally {
       setIsHydrated(true)
     }
-  }, [])
+  }, [isPersistedCardStateLoaded, persistedCardState, isHydrated])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -159,13 +134,22 @@ function App() {
       showDefinitions
     }
 
-    try {
-      localStorage.setItem(CARD_STATE_STORAGE_KEY, JSON.stringify(stateToPersist))
-      setLastSavedAt(new Date().toLocaleTimeString())
-    } catch (error) {
-      console.error('Failed to save card state to local storage:', error)
-    }
-  }, [isHydrated, pilot, hidePilotSkill, specialAbilityDisplayMode, showDefinitions])
+    savePersistedCardState(stateToPersist, {
+      onSuccess: ({ savedAt }) => {
+        setLastSavedAt(savedAt)
+      },
+      onError: (error) => {
+        console.error('Failed to save card state to local storage:', error)
+      }
+    })
+  }, [
+    isHydrated,
+    pilot,
+    hidePilotSkill,
+    specialAbilityDisplayMode,
+    showDefinitions,
+    savePersistedCardState
+  ])
 
   const rankOptions = Object.values(Rank)
   const skillOptions = Object.values(SkillTier).filter((value): value is SkillTier => typeof value === 'number')
@@ -205,21 +189,6 @@ function App() {
     updatePilot('portraitId', getRandomPortraitIdByGender(pilot.gender))
   }
 
-  const toggleSpecialAbility = (ability: SpecialAbilityRecord) => {
-    setPilot((currentPilot) => ({
-      ...currentPilot,
-      specialAbilities: currentPilot.specialAbilities.includes(ability.name)
-        ? currentPilot.specialAbilities.filter((currentAbility) => currentAbility !== ability.name)
-        : currentPilot.specialAbilities.length >= MAX_SPECIAL_ABILITIES
-        ? currentPilot.specialAbilities
-        : [...currentPilot.specialAbilities, ability.name]
-    }))
-  }
-
-  const clearSpecialAbilities = () => {
-    setPilot((currentPilot) => ({ ...currentPilot, specialAbilities: [] }))
-  }
-
   const handleShowPilotSkillChange = (shouldShow: boolean) => {
     const shouldHide = !shouldShow
     setHidePilotSkill(shouldHide)
@@ -250,9 +219,16 @@ function App() {
   }
 
   const resetSavedCard = () => {
-    localStorage.removeItem(CARD_STATE_STORAGE_KEY)
+    clearPersistedCardState(undefined, {
+      onError: (error) => {
+        console.error('Failed to clear saved card state from local storage:', error)
+      }
+    })
     setPilot(createDefaultPilot())
+    setHidePilotSkill(true)
+    setSpecialAbilityDisplayMode('nameOnly')
     setShowDefinitions(true)
+    setLastSavedAt(null)
   }
 
   return (
@@ -380,43 +356,11 @@ function App() {
               </select>
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium mb-2">Special Abilities</label>
-            <div className="space-y-2 rounded-md border border-gray-300 bg-white p-3 h-48 overflow-y-auto">
-              {specialAbilityOptions.map((ability) => (
-                <label
-                  key={ability.name}
-                  className={`flex items-center gap-2 text-sm ${
-                    !pilot.specialAbilities.includes(ability.name) && pilot.specialAbilities.length >= MAX_SPECIAL_ABILITIES
-                      ? 'text-gray-400'
-                      : ''
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={pilot.specialAbilities.includes(ability.name)}
-                    disabled={!pilot.specialAbilities.includes(ability.name) && pilot.specialAbilities.length >= MAX_SPECIAL_ABILITIES}
-                    onChange={() => toggleSpecialAbility(ability)}
-                  />
-                  <span>{ability.name}</span>
-                </label>
-              ))}
-              <div className="text-xs text-gray-500">
-                {pilot.specialAbilities.length}/{MAX_SPECIAL_ABILITIES} selected
-              </div>
-            </div>
-          </div>
-
-          <button
-            disabled={pilot.specialAbilities.length === 0}
-            className={classNames(
-              "bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600",
-              { "opacity-50 cursor-not-allowed": pilot.specialAbilities.length === 0 }
-            )}
-            onClick={clearSpecialAbilities}
-          >
-            Clear Special Abilities
-          </button>
+          <SpecialAbilitiesSelector
+            selectedAbilities={pilot.specialAbilities}
+            onSelectedAbilitiesChange={(abilities) => updatePilot('specialAbilities', abilities)}
+            onOptionsChange={setSpecialAbilityOptions}
+          />
 
           <div>
             <label className="block text-sm font-medium mb-1">Special Ability Display</label>
