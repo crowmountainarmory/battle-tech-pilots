@@ -35,6 +35,8 @@ export enum SpecialAbilities {
 export interface Pilot {
   firstName: string
   lastName: string
+  callsign: string
+  useCallsign: boolean
   gender: PilotGender
   portraitId: string
   faction: Faction
@@ -57,6 +59,10 @@ interface PilotCardProps {
 
 const PilotCard = forwardRef<HTMLDivElement, PilotCardProps>(({ pilot, hidePilotSkill = false, specialAbilityRecords = [], specialAbilityDisplayMode = 'nameOnly' }, ref) => {
   const selectedPortrait = getPortraitById(pilot.portraitId)
+  const trimmedCallsign = pilot.callsign.trim()
+  const displayName = pilot.useCallsign && trimmedCallsign.length > 0
+    ? `${pilot.firstName} "${trimmedCallsign}" ${pilot.lastName}`
+    : `${pilot.firstName} ${pilot.lastName}`
 
   const renderSpecialAbility = (abilityName: string) => {
     const abilityRecord = specialAbilityRecords.find((record) => record.name === abilityName)
@@ -113,7 +119,7 @@ const PilotCard = forwardRef<HTMLDivElement, PilotCardProps>(({ pilot, hidePilot
         {/* Pilot Name and Rank Section */}
         <div className="p-2">
           <div className="text-lg font-semibold tracking-[0.3em]">{pilot.rank}</div>
-          <div className="text-4xl font-bold leading-none">{pilot.firstName} {pilot.lastName}</div>
+          <div className="text-4xl font-bold leading-none">{displayName}</div>
         </div>
 
         {/* Pilot Skills Section */}

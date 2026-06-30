@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { domToPng } from 'modern-screenshot'
-import { faker } from '@faker-js/faker'
 import GenericDropdown from './components/common/GenericDropdown'
 import RandomizableInput from './components/common/RandomizableInput'
 import FactionSelector, { Faction } from './components/common/FactionSelector'
@@ -19,6 +18,11 @@ import {
 } from './data/pilotPortraits'
 import { type SpecialAbilityRecord } from './data/specialAbilitiesDb'
 import {
+  getRandomCallsign,
+  getRandomFirstName,
+  getRandomLastName
+} from './lib/pilotIdentity'
+import {
   type PersistedCardState,
   useClearPersistedCardStateMutation,
   usePersistedCardStateQuery,
@@ -27,8 +31,10 @@ import {
 
 
 const createDefaultPilot = (): Pilot => ({
-  firstName: faker.person.firstName('male'),
-  lastName: faker.person.lastName('male'),
+  firstName: getRandomFirstName(PilotGender.Male),
+  lastName: getRandomLastName(PilotGender.Male),
+  callsign: getRandomCallsign(),
+  useCallsign: false,
   gender: PilotGender.Male,
   portraitId: getDefaultPortraitIdByGender(PilotGender.Male),
   faction: Faction.Davion,
@@ -101,6 +107,8 @@ function App() {
             : typeof legacyPilot.name === 'string'
             ? legacyPilot.name
             : defaultPilot.lastName,
+          callsign: typeof parsed.pilot.callsign === 'string' ? parsed.pilot.callsign : defaultPilot.callsign,
+          useCallsign: typeof parsed.pilot.useCallsign === 'boolean' ? parsed.pilot.useCallsign : defaultPilot.useCallsign,
           gender: hydratedGender,
           portraitId: hydratedPortrait && hydratedPortrait.gender === hydratedGender
             ? hydratedPortrait.id
@@ -233,12 +241,6 @@ function App() {
     setPilot((currentPilot) => ({ ...currentPilot, [key]: value }))
   }
 
-  const getRandomFirstName = (gender: PilotGender = PilotGender.Male): string =>
-    faker.person.firstName(gender === PilotGender.Male ? 'male' : 'female')
-
-  const getRandomLastName = (gender: PilotGender = PilotGender.Male): string =>
-    faker.person.lastName(gender === PilotGender.Male ? 'male' : 'female')
-
   const updatePilotGender = (gender: PilotGender) => {
     updatePilot('gender', gender)
     updatePilot('portraitId', getDefaultPortraitIdByGender(gender))
@@ -319,6 +321,25 @@ function App() {
             onFieldChange={updatePilot}
             randomizeValue={() => getRandomLastName(pilot.gender)}
           />
+          <div className="rounded-md border border-gray-300 bg-white p-3">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={pilot.useCallsign}
+                onChange={(e) => updatePilot('useCallsign', e.target.checked)}
+              />
+              Use Callsign
+            </label>
+          </div>
+          {pilot.useCallsign && (
+            <RandomizableInput<Pilot, 'callsign'>
+              label="Callsign"
+              fieldName="callsign"
+              value={pilot.callsign}
+              onFieldChange={updatePilot}
+              randomizeValue={getRandomCallsign}
+            />
+          )}
           
           <div className="flex gap-2">
             <button
