@@ -55,7 +55,7 @@ function SpecialAbilitiesSelector({
   return (
     <>
       <div>
-        <label className="block text-sm font-medium mb-2">Special Abilities</label>
+        <label className="block text-sm font-medium mb-2">Special Abilities ({selectedAbilities.length}/{maxSelected})</label>
         <div className="space-y-2 rounded-md border border-gray-300 bg-white p-3 h-48 overflow-y-auto">
           {isLoading && <div className="text-sm text-gray-500">Loading special abilities...</div>}
           {isError && <div className="text-sm text-red-600">Failed to load special abilities.</div>}

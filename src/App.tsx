@@ -40,6 +40,18 @@ const createDefaultPilot = (): Pilot => ({
 
 const defaultPilot = createDefaultPilot()
 
+const getMaxSpecialAbilitiesBySkill = (skill: number): number => {
+  if (skill >= 4) {
+    return 1
+  }
+
+  if (skill === 3 || skill === 2) {
+    return 2
+  }
+
+  return 3
+}
+
 function App() {
   const cardRef = useRef<HTMLDivElement>(null)
   const [specialAbilityOptions, setSpecialAbilityOptions] = useState<SpecialAbilityRecord[]>([])
@@ -178,6 +190,8 @@ function App() {
     .map((skill) => ({ value: skill, label: `${skill}+` }))
   const areSpecialAbilitiesDisabled =
     pilot.gunnerySkill >= SkillTier.Green || pilot.pilotingSkill >= SkillTier.Green
+  const pilotSkillForSpecialAbilities = Math.min(pilot.gunnerySkill, pilot.pilotingSkill)
+  const maxSpecialAbilities = getMaxSpecialAbilitiesBySkill(pilotSkillForSpecialAbilities)
   const specialAbilitiesDisabledMessage =
     pilot.gunnerySkill >= SkillTier.Green && pilot.pilotingSkill >= SkillTier.Green
       ? 'Special abilities are disabled when gunnery or piloting skill is 5+.'
@@ -202,6 +216,18 @@ function App() {
 
     updatePilot('specialAbilities', [])
   }, [areSpecialAbilitiesDisabled, pilot.specialAbilities.length])
+
+  useEffect(() => {
+    if (areSpecialAbilitiesDisabled) {
+      return
+    }
+
+    if (pilot.specialAbilities.length <= maxSpecialAbilities) {
+      return
+    }
+
+    updatePilot('specialAbilities', pilot.specialAbilities.slice(0, maxSpecialAbilities))
+  }, [areSpecialAbilitiesDisabled, maxSpecialAbilities, pilot.specialAbilities])
 
   const updatePilot = <K extends keyof Pilot>(key: K, value: Pilot[K]) => {
     setPilot((currentPilot) => ({ ...currentPilot, [key]: value }))
@@ -353,6 +379,7 @@ function App() {
             selectedAbilities={pilot.specialAbilities}
             onSelectedAbilitiesChange={(abilities) => updatePilot('specialAbilities', abilities)}
             onOptionsChange={setSpecialAbilityOptions}
+            maxSelected={maxSpecialAbilities}
             disabled={areSpecialAbilitiesDisabled}
             disabledMessage={specialAbilitiesDisabledMessage}
           />
