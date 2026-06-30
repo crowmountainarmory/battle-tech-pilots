@@ -1,33 +1,74 @@
 export interface SpecialAbilityRecord {
   name: string
+  cost: number
   shortDescritpion: string
-  ruleDescription: string
+  ruleDescription?: string
 }
 
 export const SPECIAL_ABILITIES_DATA: SpecialAbilityRecord[] = [
-  {
-    name: 'Ace Pilot',
-    shortDescritpion: 'Exceptional handling and precision.',
-    ruleDescription: 'The pilot gains a bonus when making difficult maneuver checks and may reroll one failed piloting-related test per scenario.'
-  },
-  {
-    name: 'Battle Hardened',
-    shortDescritpion: 'Shrugs off pressure under fire.',
-    ruleDescription: 'Reduce the first morale or suppression effect suffered each round by one step.'
-  },
-  {
-    name: 'Deadeye',
-    shortDescritpion: 'Lands shots with uncanny consistency.',
-    ruleDescription: 'Once per activation, the pilot may reroll one attack die after seeing the result.'
-  },
-  {
-    name: 'Field Mechanic',
-    shortDescritpion: 'Keeps the machine running in the field.',
-    ruleDescription: 'After completing a repair action, restore one additional point of integrity or armor if available.'
-  },
-  {
-    name: 'Tactical Mind',
-    shortDescritpion: 'Sees the shape of the battle quickly.',
-    ruleDescription: 'At the start of the round, the pilot may adjust initiative or target priority as allowed by the scenario rules.'
-  }
+  { name: 'Animal Mimicry', cost: 2, shortDescritpion: 'Quadruped unit gains mobility bonus and ability to demoralize opponents', ruleDescription: '' },
+  { name: 'Antagonizer', cost: 3, shortDescritpion: 'Unit can enrage an opponent for a brief period', ruleDescription: '' },
+  { name: 'Blood Stalker', cost: 2, shortDescritpion: 'Unit may focus its attacks better on a preferred target until it is destroyed', ruleDescription: '' },
+  { name: 'Cluster Hitter', cost: 2, shortDescritpion: 'Unit can deliver extra damage in an attack using missiles or flak weapons', ruleDescription: '' },
+  { name: 'Combat Intuition', cost: 3, shortDescritpion: 'Unit may move and resolve fire before any other unit acts', ruleDescription: '' },
+  { name: 'Cross-Country', cost: 2, shortDescritpion: 'Ground vehicle unit may enter some illegal terrain types, but at high Move cost', ruleDescription: '' },
+  { name: 'Demoralizer', cost: 3, shortDescritpion: 'Unit can intimidate an opponent for a brief period', ruleDescription: '' },
+  { name: 'Dodge', cost: 2, shortDescritpion: 'Unit can attempt to evade physical attacks', ruleDescription: '' },
+  { name: 'Dust-Off', cost: 2, shortDescritpion: 'Enables airborne unit types to land or liftoff in non-clear terrain', ruleDescription: '' },
+  { name: "Eagle's Eyes", cost: 2, shortDescritpion: 'Unit gains (or augments) its ability to spot hidden units and avoid mines', ruleDescription: '' },
+  { name: 'Environmental Specialist', cost: 2, shortDescritpion: 'Reduces movement and combat modifiers in a preferred environment', ruleDescription: '' },
+  { name: 'Fist Fire', cost: 2, shortDescritpion: 'Unit delivers extra damage in physical attacks', ruleDescription: '' },
+  { name: 'Float Like a Butterfly (1)', cost: 1, shortDescritpion: 'Unit may force an opponent to reroll an attack with this unit as the target', ruleDescription: '' },
+  { name: 'Float Like a Butterfly (2)', cost: 2, shortDescritpion: 'Unit may force an opponent to reroll an attack with this unit as the target', ruleDescription: '' },
+  { name: 'Float Like a Butterfly (3)', cost: 3, shortDescritpion: 'Unit may force an opponent to reroll an attack with this unit as the target', ruleDescription: '' },
+  { name: 'Float Like a Butterfly (4)', cost: 4, shortDescritpion: 'Unit may force an opponent to reroll an attack with this unit as the target', ruleDescription: '' },
+  { name: 'Forward Observer', cost: 1, shortDescritpion: 'Unit improves accuracy of indirect fire when used as a spotter', ruleDescription: '' },
+  { name: 'Golden Goose', cost: 3, shortDescritpion: 'Improves accuracy for air-to-ground strafing, strike, and bombing attacks', ruleDescription: '' },
+  { name: 'Ground-Hugger', cost: 2, shortDescritpion: 'Airborne unit may execute a double-strafe or double-strike air-to-ground attack', ruleDescription: '' },
+  { name: 'Headhunter', cost: 2, shortDescritpion: 'Can automatically identify enemy command units', ruleDescription: '' },
+  { name: 'Heavy Lifter', cost: 1, shortDescritpion: 'Enables increased carrying capacity with External Cargo rules', ruleDescription: '' },
+  { name: 'Hopper', cost: 1, shortDescritpion: 'Unit may avoid being reduced below 1 inch of Move by MP Hits', ruleDescription: '' },
+  { name: 'Hot Dog', cost: 2, shortDescritpion: 'Increases the Heat a unit can sustain before shutdown', ruleDescription: '' },
+  { name: 'Human TRO', cost: 1, shortDescritpion: 'Unit can ignore the Concealing Unit Data rules vs. non-hidden opponents', ruleDescription: '' },
+  { name: 'Iron Will', cost: 1, shortDescritpion: 'Unit can resist psychological attacks and receives a bonus during Morale checks', ruleDescription: '' },
+  { name: 'Jumping Jack', cost: 2, shortDescritpion: 'Improves accuracy of any attack made when the unit uses jumping Move', ruleDescription: '' },
+  { name: 'Lucky (1)', cost: 1, shortDescritpion: 'Unit may reroll 1 failed attacks and Control Rolls per scenario', ruleDescription: '' },
+  { name: 'Lucky (2)', cost: 2, shortDescritpion: 'Unit may reroll 2 failed attacks and Control Rolls per scenario', ruleDescription: '' },
+  { name: 'Lucky (3)', cost: 3, shortDescritpion: 'Unit may reroll 3 failed attacks and Control Rolls per scenario', ruleDescription: '' },
+  { name: 'Lucky (4)', cost: 4, shortDescritpion: 'Unit may reroll 4 failed attacks and Control Rolls per scenario', ruleDescription: '' },
+  { name: 'Maneuvering Ace', cost: 2, shortDescritpion: 'Reduces Move costs for woods/jungle terrain and aerospace atmospheric control', ruleDescription: '' },
+  { name: 'Marksman', cost: 2, shortDescritpion: 'If unit attacks while stationary, may score extra critical after delivering 1 damage', ruleDescription: '' },
+  { name: 'Melee Master', cost: 2, shortDescritpion: 'Unit increases its physical attack damage by half its Size (round up)', ruleDescription: '' },
+  { name: 'Melee Specialist', cost: 1, shortDescritpion: 'Unit delivers physical attacks with greater accuracy', ruleDescription: '' },
+  { name: 'Multi-Tasker', cost: 2, shortDescritpion: 'Unit can divide its weapon attack between two targets per turn', ruleDescription: '' },
+  { name: 'Natural Grace', cost: 3, shortDescritpion: 'Unit gains 360-degree field of fire; reduces Move costs in ultra-heavy terrain', ruleDescription: '' },
+  { name: 'Oblique Artilleryman', cost: 1, shortDescritpion: 'Improves accuracy and reduces scatter for all artillery weapon attacks', ruleDescription: '' },
+  { name: 'Oblique Attacker', cost: 1, shortDescritpion: 'Improves accuracy for indirect fire, and enables indirect attacks without a spotter', ruleDescription: '' },
+  { name: 'Range Master', cost: 2, shortDescritpion: 'Unit swaps normal range modifier for Medium, Long, or Extreme range with Short', ruleDescription: '' },
+  { name: 'Ride the Wash', cost: 4, shortDescritpion: 'Unit reduces atmospheric combat modifiers; may execute special air-to-air attack', ruleDescription: '' },
+  { name: 'Sandblaster', cost: 2, shortDescritpion: 'Unit improves accuracy and damage when only using AC and missile weapons', ruleDescription: '' },
+  { name: 'Shaky Stick', cost: 2, shortDescritpion: 'Airborne unit is harder to hit from the ground during air-to-ground attacks', ruleDescription: '' },
+  { name: 'Sharpshooter', cost: 4, shortDescritpion: 'If unit attacks while stationary, may score an extra critical after delivering full damage', ruleDescription: '' },
+  { name: 'Slugger', cost: 1, shortDescritpion: "'Mech unit can improvise its own melee weapons from suitable terrain", ruleDescription: '' },
+  { name: 'Sniper', cost: 3, shortDescritpion: 'Unit reduces Medium, Long, and Extreme range modifiers by half.', ruleDescription: '' },
+  { name: 'Speed Demon', cost: 2, shortDescritpion: 'Unit can move faster than normal', ruleDescription: '' },
+  { name: 'Stand-Aside', cost: 1, shortDescritpion: 'Unit can pass directly through enemy units at extra Move cost', ruleDescription: '' },
+  { name: 'Street Fighter', cost: 2, shortDescritpion: 'Unit may pre-empt an attack against it by enemies in base contact', ruleDescription: '' },
+  { name: 'Sure-Footed', cost: 2, shortDescritpion: 'Unit receives bonus movement on paved or ice terrain and ignores skidding', ruleDescription: '' },
+  { name: 'Swordsman', cost: 2, shortDescritpion: 'Unit can deliver improved damage or critical hits when using MEL special', ruleDescription: '' },
+  { name: 'Tactical Genius', cost: 3, shortDescritpion: 'Enables command unit to reroll Initiatives once every 2 turns', ruleDescription: '' },
+  { name: 'Terrain Master [Drag Racer]', cost: 3, shortDescritpion: 'Ground vehicle unit gains extra speed on ice or pavement; avoids skidding better', ruleDescription: '' },
+  { name: 'Terrain Master [Forest Ranger]', cost: 3, shortDescritpion: 'Unit moves more easily through (and gains extra cover from) woods and jungle', ruleDescription: '' },
+  { name: 'Terrain Master [Frogman]', cost: 3, shortDescritpion: 'Unit moves more easily than others while fully submerged', ruleDescription: '' },
+  { name: 'Terrain Master [Mountaineer]', cost: 3, shortDescritpion: 'Unit moves more easily through level changes and rough terrain types', ruleDescription: '' },
+  { name: 'Terrain Master [Nightwalker]', cost: 3, shortDescritpion: 'Unit ignores combat modifiers for darkness', ruleDescription: '' },
+  { name: 'Terrain Master [Sea Monster]', cost: 3, shortDescritpion: 'Unit moves more easily and ignores attack penalties in water terrain', ruleDescription: '' },
+  { name: 'Terrain Master [Swamp Beast]', cost: 3, shortDescritpion: 'Unit moves more easily through mud and swamp terrain; ignores bog down in same', ruleDescription: '' },
+  { name: 'Weapon Specialist', cost: 3, shortDescritpion: 'Unit can deliver a more accurate attack as long as it uses only half its firepower', ruleDescription: '' },
+  { name: 'Wind Walker', cost: 2, shortDescritpion: 'Unit ignores atmospheric combat modifiers and gains a bonus to landing and liftoff', ruleDescription: '' },
+  { name: 'Zweihander', cost: 2, shortDescritpion: "'Mech unit delivers more damage in physical attacks", ruleDescription: '' },
+  { name: 'Light Horseman', cost: 2, shortDescritpion: 'Beast-mounted infantry unit moves faster, even through difficult terrain', ruleDescription: '' },
+  { name: 'Heavy Horse', cost: 2, shortDescritpion: 'Beast-mounted infantry unit can inflict extra damage at point-blank range', ruleDescription: '' },
+  { name: 'Foot Cavalry', cost: 1, shortDescritpion: 'Foot-based infantry unit moves faster, even through difficult terrain', ruleDescription: '' },
+  { name: 'Urban Guerrilla', cost: 1, shortDescritpion: 'Infantry unit is harder to attack in urban terrain, and may "spawn" support', ruleDescription: '' },
 ]

@@ -20,6 +20,7 @@ import {
   initializeSpecialAbilitiesDatabase,
   type SpecialAbilityRecord
 } from './data/specialAbilitiesDb'
+import classNames from 'classnames'
 
 const CARD_STATE_STORAGE_KEY = 'battle-tech-pilot-card-state-v1'
 const MAX_SPECIAL_ABILITIES = 3
@@ -215,6 +216,10 @@ function App() {
     }))
   }
 
+  const clearSpecialAbilities = () => {
+    setPilot((currentPilot) => ({ ...currentPilot, specialAbilities: [] }))
+  }
+
   const handleShowPilotSkillChange = (shouldShow: boolean) => {
     const shouldHide = !shouldShow
     setHidePilotSkill(shouldHide)
@@ -377,7 +382,7 @@ function App() {
           )}
           <div>
             <label className="block text-sm font-medium mb-2">Special Abilities</label>
-            <div className="space-y-2 rounded-md border border-gray-300 bg-white p-3">
+            <div className="space-y-2 rounded-md border border-gray-300 bg-white p-3 h-48 overflow-y-auto">
               {specialAbilityOptions.map((ability) => (
                 <label
                   key={ability.name}
@@ -401,6 +406,17 @@ function App() {
               </div>
             </div>
           </div>
+
+          <button
+            disabled={pilot.specialAbilities.length === 0}
+            className={classNames(
+              "bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600",
+              { "opacity-50 cursor-not-allowed": pilot.specialAbilities.length === 0 }
+            )}
+            onClick={clearSpecialAbilities}
+          >
+            Clear Special Abilities
+          </button>
 
           <div>
             <label className="block text-sm font-medium mb-1">Special Ability Display</label>

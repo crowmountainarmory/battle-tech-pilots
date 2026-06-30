@@ -9,15 +9,24 @@ import classNames from 'classnames';
 
 interface DiceIconProps extends React.ImgHTMLAttributes<HTMLImageElement> {
     pips: number
-    size: number
+    size?: number
 }
 
-function Die({pips, className, size}: DiceIconProps): React.ReactElement {
+function Die({ pips, className, size = 8 }: DiceIconProps): React.ReactElement {
     const icons = [diceIcon1, diceIcon2, diceIcon3, diceIcon4, diceIcon5, diceIcon6];
-    return <img src={icons[pips - 1]} alt={`Dice showing ${pips}`} className={classNames(`size-${size} inline`, className)} />;
+    const dieSizeRem = size / 4;
+
+    return (
+        <img
+            src={icons[pips - 1]}
+            alt={`Dice showing ${pips}`}
+            className={classNames('inline-block align-middle', className)}
+            style={{ width: `${dieSizeRem}rem`, height: `${dieSizeRem}rem` }}
+        />
+    );
 }
 
-function DiceIcon({className, pips, size}: DiceIconProps): React.ReactElement {
+function DiceIcon({className, pips, size = 8}: DiceIconProps): React.ReactElement {
     if (pips < 1) {
         throw new Error('Invalid number of pips for a die. Must be greater than 1');
     }
