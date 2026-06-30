@@ -21,7 +21,8 @@ export enum SkillTier {
   Regular = 4,
   Veteran = 3,
   Elite = 2,
-  Ace = 1
+  Ace = 1,
+  Legendary = 0
 }
 
 export enum SpecialAbilities {

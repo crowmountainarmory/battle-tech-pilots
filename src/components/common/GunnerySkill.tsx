@@ -7,8 +7,8 @@ interface GunnerySkillProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function GunnerySkill({ skill, className, ...props }: GunnerySkillProps) {
-	if (!Number.isInteger(skill) || skill < 1 || skill > 6) {
-		throw new Error('Invalid pilot skill. Expected an integer from 1 to 6.')
+	if (!Number.isInteger(skill) || skill < 0 || skill > 6) {
+		throw new Error('Invalid pilot skill. Expected an integer from 0 to 6.')
 	}
 
 	return (
