@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { domToPng } from 'modern-screenshot'
 import { faker } from '@faker-js/faker'
-import DiceIcon from './components/common/DiceIcon'
+import GenericDropdown from './components/common/GenericDropdown'
+import RandomizableInput from './components/common/RandomizableInput'
 import FactionSelector, { Faction } from './components/common/FactionSelector'
 import PilotGenderSelector from './components/common/PilotGenderSelector'
 import PilotImageGallery from './components/common/PilotImageGallery'
@@ -151,8 +152,10 @@ function App() {
     savePersistedCardState
   ])
 
-  const rankOptions = Object.values(Rank)
-  const skillOptions = Object.values(SkillTier).filter((value): value is SkillTier => typeof value === 'number')
+  const rankOptions = Object.values(Rank).map((rank) => ({ value: rank, label: rank }))
+  const skillOptions = Object.values(SkillTier)
+    .filter((value): value is SkillTier => typeof value === 'number')
+    .map((skill) => ({ value: skill, label: `${skill}+` }))
   const portraitsForSelectedGender = getPortraitsByGender(pilot.gender)
   const specialAbilityDisplayModeOptions: Array<{ value: SpecialAbilityDisplayMode; label: string }> = [
     { value: 'nameOnly', label: 'Name Only' },
@@ -164,25 +167,23 @@ function App() {
     setPilot((currentPilot) => ({ ...currentPilot, [key]: value }))
   }
 
-  const generateRandomFirstName = (gender: PilotGender = PilotGender.Male) => {
-    updatePilot('firstName', faker.person.firstName(gender === PilotGender.Male ? 'male' : 'female'))
-  }
+  const getRandomFirstName = (gender: PilotGender = PilotGender.Male): string =>
+    faker.person.firstName(gender === PilotGender.Male ? 'male' : 'female')
 
-  const generateRandomLastName = (gender: PilotGender = PilotGender.Male) => {
-    updatePilot('lastName', faker.person.lastName(gender === PilotGender.Male ? 'male' : 'female'))
-  }
+  const getRandomLastName = (gender: PilotGender = PilotGender.Male): string =>
+    faker.person.lastName(gender === PilotGender.Male ? 'male' : 'female')
 
   const updatePilotGender = (gender: PilotGender) => {
     updatePilot('gender', gender)
     updatePilot('portraitId', getDefaultPortraitIdByGender(gender))
-    generateRandomFirstName(gender)
+    updatePilot('firstName', getRandomFirstName(gender))
   }
 
   const randomizeGenderAndImage = () => {
     const randomGender = getRandomPilotGender()
     updatePilot('gender', randomGender)
     updatePilot('portraitId', getRandomPortraitIdByGender(randomGender))
-    generateRandomFirstName(randomGender)
+    updatePilot('firstName', getRandomFirstName(randomGender))
   }
 
   const randomizeImage = () => {
@@ -238,42 +239,20 @@ function App() {
         <h2 className="text-2xl font-bold mb-6">Define Card</h2>
         <div className="card-form space-y-4">
           <PilotGenderSelector selectedGender={pilot.gender} onSelect={updatePilotGender} />
-          <div>
-            <label className="block text-sm font-medium mb-1">First Name</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={pilot.firstName}
-                onChange={(e) => updatePilot('firstName', e.target.value)}
-                className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-md"
-              />
-              <button
-                type="button"
-                onClick={() => generateRandomFirstName(pilot.gender)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              >
-                <DiceIcon pips={6} />
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Last Name</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={pilot.lastName}
-                onChange={(e) => updatePilot('lastName', e.target.value)}
-                className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-md"
-              />
-              <button
-                type="button"
-                onClick={() => generateRandomLastName(pilot.gender)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              >
-                <DiceIcon pips={6} />
-              </button>
-            </div>
-          </div>
+          <RandomizableInput<Pilot, 'firstName'>
+            label="First Name"
+            fieldName="firstName"
+            value={pilot.firstName}
+            onFieldChange={updatePilot}
+            randomizeValue={() => getRandomFirstName(pilot.gender)}
+          />
+          <RandomizableInput<Pilot, 'lastName'>
+            label="Last Name"
+            fieldName="lastName"
+            value={pilot.lastName}
+            onFieldChange={updatePilot}
+            randomizeValue={() => getRandomLastName(pilot.gender)}
+          />
           
           <div className="flex gap-2">
             <button
@@ -296,40 +275,22 @@ function App() {
             selectedPortraitId={pilot.portraitId}
             onSelect={(portraitId) => updatePilot('portraitId', portraitId)}
           />
-          <div>
-            <FactionSelector
-              selectedFaction={pilot.faction}
-              onChange={(faction) => updatePilot('faction', faction)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Rank</label>
-            <select
-              value={pilot.rank}
-              onChange={(e) => updatePilot('rank', e.target.value as Rank)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              {rankOptions.map((rank) => (
-                <option key={rank} value={rank}>
-                  {rank}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Gunnery Skill</label>
-            <select
-              value={pilot.gunnerySkill}
-              onChange={(e) => updatePilot('gunnerySkill', Number(e.target.value) as SkillTier)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              {skillOptions.map((skill) => (
-                <option key={skill} value={skill}>
-                  {skill}+
-                </option>
-              ))}
-            </select>
-          </div>
+          <FactionSelector
+            selectedFaction={pilot.faction}
+            onChange={(faction) => updatePilot('faction', faction)}
+          />
+          <GenericDropdown<Rank>
+            label="Rank"
+            value={pilot.rank}
+            options={rankOptions}
+            onChange={(rank) => updatePilot('rank', rank)}
+          />
+          <GenericDropdown<SkillTier>
+            label="Gunnery Skill"
+            value={pilot.gunnerySkill}
+            options={skillOptions}
+            onChange={(skill) => updatePilot('gunnerySkill', skill)}
+          />
           <div className="rounded-md border border-gray-300 bg-white p-3">
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
@@ -341,20 +302,12 @@ function App() {
             </label>
           </div>
           {!hidePilotSkill && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Piloting Skill</label>
-              <select
-                value={pilot.pilotingSkill}
-                onChange={(e) => updatePilot('pilotingSkill', Number(e.target.value) as SkillTier)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                {skillOptions.map((skill) => (
-                  <option key={skill} value={skill}>
-                    {skill}+
-                  </option>
-                ))}
-              </select>
-            </div>
+            <GenericDropdown<SkillTier>
+              label="Piloting Skill"
+              value={pilot.pilotingSkill}
+              options={skillOptions}
+              onChange={(skill) => updatePilot('pilotingSkill', skill)}
+            />
           )}
           <SpecialAbilitiesSelector
             selectedAbilities={pilot.specialAbilities}
@@ -362,20 +315,12 @@ function App() {
             onOptionsChange={setSpecialAbilityOptions}
           />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Special Ability Display</label>
-            <select
-              value={specialAbilityDisplayMode}
-              onChange={(e) => setSpecialAbilityDisplayMode(e.target.value as SpecialAbilityDisplayMode)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              {specialAbilityDisplayModeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <GenericDropdown<SpecialAbilityDisplayMode>
+            label="Special Ability Display"
+            value={specialAbilityDisplayMode}
+            options={specialAbilityDisplayModeOptions}
+            onChange={setSpecialAbilityDisplayMode}
+          />
           
           <button
             onClick={exportToPNG}
